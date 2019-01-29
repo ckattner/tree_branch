@@ -1,0 +1,11 @@
+language: ruby
+rvm:
+# Build on the latest stable of all supported Rubies (https://www.ruby-lang.org/en/downloads/):
+- 2.3.8
+- 2.4.5
+- 2.5.3
+- 2.6.0
+cache: bundler
+script:
+- bundle exec rubocop
+- bundle exec rspec

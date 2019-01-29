@@ -1,0 +1,22 @@
+:data:
+  name: Matt
+  :dob: '1920-01-04'
+  state: IL
+  injected: Mattcakes!!
+:children:
+- :data:
+    :name: Nick
+    dob: '1930-04-04'
+    :state: WI
+    injected: Nickcakes!!
+  :children:
+  - :data:
+      name: Katie
+      :dob: '1820-02-05'
+      :state: CA
+      injected: Katiecakes!!
+- :data:
+    :name: Sam
+    dob: '1940-09-12'
+    :state: AK
+    injected: Samcakes!!

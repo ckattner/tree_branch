@@ -1,0 +1,9 @@
+:data:
+  name: Matt
+  :dob: '1920-01-04'
+  state: IL
+:children:
+- :data:
+    :name: Sam
+    dob: '1940-09-12'
+    :state: AK
