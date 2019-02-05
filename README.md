@@ -1,6 +1,6 @@
 # TreeBranch
 
-[![Build Status](https://travis-ci.org/bluemarblepayroll/tree_branch.svg?branch=master)](https://travis-ci.org/bluemarblepayroll/tree_branch)
+[![Gem Version](https://badge.fury.io/rb/tree_branch.svg)](https://badge.fury.io/rb/tree_branch) [![Build Status](https://travis-ci.org/bluemarblepayroll/tree_branch.svg?branch=master)](https://travis-ci.org/bluemarblepayroll/tree_branch) [![Maintainability](https://api.codeclimate.com/v1/badges/9875bbc4672509465601/maintainability)](https://codeclimate.com/github/bluemarblepayroll/tree_branch/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/9875bbc4672509465601/test_coverage)](https://codeclimate.com/github/bluemarblepayroll/tree_branch/test_coverage) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 This library allows you to traverse an entire tree structure, compare all nodes, and choose a tree structure to return.  The basic input is defined as:
 
@@ -417,12 +417,12 @@ Note: ensure you have proper authorization before trying to publish new versions
 After code changes have successfully gone through the Pull Request review process then the following steps should be followed for publishing new versions:
 
 1. Merge Pull Request into master
-2. Update [lib/tree_branch/version.rb](https://github.com/bluemarblepayroll/tree_branch/blob/master/lib/tree_branch/version.rb) [version number](https://semver.org/)
-3. Bundle
-4. Update CHANGELOG.md
-5. Commit & Push master to remote and ensure CI builds master successfully
+2. Update ```lib/tree_branch/version.rb``` using [semantic versioning](https://semver.org/)
+3. Install dependencies: ```bundle```
+4. Update ```CHANGELOG.md``` with release notes
+5. Commit & push master to remote and ensure CI builds master successfully
 6. Build the project locally: `gem build tree_branch`
-7. Publish package to NPM: `gem push tree_branch-X.gem` where X is the version to push
+7. Publish package to RubyGems: `gem push tree_branch-X.gem` where X is the version to push
 8. Tag master with new version: `git tag <version>`
 9. Push tags remotely: `git push origin --tags`
 

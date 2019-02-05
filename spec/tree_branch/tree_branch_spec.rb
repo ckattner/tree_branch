@@ -9,6 +9,57 @@
 
 require './spec/spec_helper'
 
+require 'pry'
+
+class MenuItem
+  acts_as_hashable
+
+  attr_reader :menu_items, :name
+
+  def initialize(name: '', menu_items: [])
+    @name       = name
+    @menu_items = self.class.array(menu_items)
+  end
+
+  def eql?(other)
+    name == other.name && menu_items == other.menu_items
+  end
+
+  def ==(other)
+    eql?(other)
+  end
+end
+
+class BornAfter1915 < ::TreeBranch::Comparator
+  def valid?
+    Date.parse(data.dob).year > 1915
+  end
+end
+
+class NameStartsWith < ::TreeBranch::Comparator
+  def valid?
+    context[:letters].include?(data.name.to_s[0])
+  end
+end
+
+class StateComparator < ::TreeBranch::Comparator
+  STATE_OPS = {
+    none: %i[open],
+    passive: %i[open save close print],
+    active: %i[open save close print cut copy paste]
+  }.freeze
+
+  def valid?
+    data.command.nil? || Array(STATE_OPS[context[:state]]).include?(data.command)
+  end
+end
+
+class AuthorizationComparator < ::TreeBranch::Comparator
+  def valid?
+    data.right.nil? || Array(context[:rights]).include?(data.right)
+  end
+end
+
 describe ::TreeBranch do
   # We will use this spec to also test ::TreeBranch::Node#process since ::TreeBranch#process
   # fully delegates to that method.
@@ -31,18 +82,6 @@ describe ::TreeBranch do
 
     let(:born_after1915_starts_with_m_or_s) do
       ::TreeBranch::SimpleNode.make(born_after1915_starts_with_m_or_s_hash)
-    end
-
-    class BornAfter1915 < ::TreeBranch::Comparator
-      def valid?
-        Date.parse(data.dob).year > 1915
-      end
-    end
-
-    class NameStartsWith < ::TreeBranch::Comparator
-      def valid?
-        context[:letters].include?(data.name.to_s[0])
-      end
     end
 
     let(:name_starts_with_lambda) do
@@ -68,9 +107,9 @@ describe ::TreeBranch do
 
     it 'should return valid nodes with two class comparators' do
       input = {
-        node:         node_hash,
-        context:      { letters: %w[M S] },
-        comparators:  [BornAfter1915, NameStartsWith]
+        node: node_hash,
+        context: { letters: %w[M S] },
+        comparators: [BornAfter1915, NameStartsWith]
       }
 
       expect(::TreeBranch.process(input)).to eq(born_after1915_starts_with_m_or_s)
@@ -78,9 +117,9 @@ describe ::TreeBranch do
 
     it 'should return valid nodes with one class comparator and one lambda comparator' do
       input = {
-        node:         node_hash,
-        context:      { letters: %w[M S] },
-        comparators:  [BornAfter1915, name_starts_with_lambda]
+        node: node_hash,
+        context: { letters: %w[M S] },
+        comparators: [BornAfter1915, name_starts_with_lambda]
       }
 
       expect(::TreeBranch.process(input)).to eq(born_after1915_starts_with_m_or_s)
@@ -90,8 +129,8 @@ describe ::TreeBranch do
       outside_variable = '!!'
 
       input = {
-        node:     node,
-        context:  OpenStruct.new(suffix: 'cakes')
+        node: node,
+        context: OpenStruct.new(suffix: 'cakes')
       }
 
       processed = ::TreeBranch.process(input) do |data, children, context|
@@ -107,18 +146,6 @@ describe ::TreeBranch do
   end
 
   describe 'README Examples' do
-    class StateComparator < ::TreeBranch::Comparator
-      STATE_OPS = {
-        none: %i[open],
-        passive: %i[open save close print],
-        active: %i[open save close print cut copy paste]
-      }.freeze
-
-      def valid?
-        data.command.nil? || Array(STATE_OPS[context[:state]]).include?(data.command)
-      end
-    end
-
     let(:menu) do
       {
         data: { name: 'Menu' },
@@ -254,12 +281,6 @@ describe ::TreeBranch do
       expect(no_file_menu).to eq(expected)
     end
 
-    class AuthorizationComparator < ::TreeBranch::Comparator
-      def valid?
-        data.right.nil? || Array(context[:rights]).include?(data.right)
-      end
-    end
-
     it 'should compute state: passive for read-only authorization' do
       no_file_menu = ::TreeBranch.process(
         node: menu,
@@ -334,25 +355,6 @@ describe ::TreeBranch do
     let(:auth_comparator) do
       lambda do |data, context|
         data.right.nil? || Array(context.rights).include?(data.right)
-      end
-    end
-
-    class MenuItem
-      acts_as_hashable
-
-      attr_reader :menu_items, :name
-
-      def initialize(name: '', menu_items: [])
-        @name       = name
-        @menu_items = self.class.array(menu_items)
-      end
-
-      def eql?(other)
-        name == other.name && menu_items == other.menu_items
-      end
-
-      def ==(other)
-        eql?(other)
       end
     end
 

@@ -10,6 +10,12 @@
 require 'date'
 require 'yaml'
 
+require 'simplecov'
+require 'simplecov-console'
+
+SimpleCov.formatter = SimpleCov::Formatter::Console
+SimpleCov.start
+
 require './lib/tree_branch'
 
 def fixture_path(filename)
