@@ -315,7 +315,7 @@ passive_read_only_menu =
 After a node has been compared and is deemed to be valid, it will either return one of two things:
 
 1. A `TreeBranch::Node` instance.
-2. The return of the block passed into the process method produced *(Note: If nil, it will be ignored as if it was invalid.)*.
+2. The return value of the block passed into the process method. *Note: If the block returns `nil` then it will be ignored as if it was invalid.*
 
 In our above example, we did not pass in a block so they would all return Node instances.  The passed in block is your chance to return instances of another class, or even do some other post-processing routines.  For example, lets return an instance of a new type: MenuItem as shown below:
 
