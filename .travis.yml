@@ -19,6 +19,7 @@ script:
 after_script:
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 addons:
+  # https://docs.travis-ci.com/user/uploading-artifacts/
   artifacts:
     paths:
       - Gemfile.lock
