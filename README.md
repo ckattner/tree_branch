@@ -422,14 +422,13 @@ Note: ensure you have proper authorization before trying to publish new versions
 After code changes have successfully gone through the Pull Request review process then the following steps should be followed for publishing new versions:
 
 1. Merge Pull Request into master
-2. Update ```lib/tree_branch/version.rb``` using [semantic versioning](https://semver.org/)
-3. Install dependencies: ```bundle```
-4. Update ```CHANGELOG.md``` with release notes
+2. Update `lib/proforma/version.rb` using [semantic versioning](https://semver.org/)
+3. Install dependencies: `bundle`
+4. Update `CHANGELOG.md` with release notes
 5. Commit & push master to remote and ensure CI builds master successfully
-6. Build the project locally: `gem build tree_branch`
-7. Publish package to RubyGems: `gem push tree_branch-X.gem` where X is the version to push
-8. Tag master with new version: `git tag <version>`
-9. Push tags remotely: `git push origin --tags`
+6. Run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+
+Note: ensure you have proper authorization before trying to publish new versions.
 
 ## License
 
