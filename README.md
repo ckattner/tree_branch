@@ -12,7 +12,7 @@ And the output is defined as:
 
 1. Compared and/or converted tree structure (root node)
 
-The specific use-case this was designed for was a dynamic web application menu. In this specific example, we wanted either a static file or a database to store and define all possible menus. Then we wanted to input a request's lifecycle context (user, url, parameters, authorization, etc.) and return the menu that matched the current spot in the application.
+The specific use-case this was designed for was a dynamic web application menu. In this specific example, we wanted either a static file or a database to store and define all possible menus. Then we wanted to input a request's lifecycle context (user, URL, parameters, authorization, etc.) and return the menu that matched the current spot in the application.
 
 ## Installation
 
@@ -62,7 +62,7 @@ menu = {
       ]
     }
   ]
-}
+}.freeze
 ````
 
 There are three application states:
@@ -85,10 +85,11 @@ class StateComparator < ::TreeBranch::Comparator
     none: %i[open],
     passive: %i[open save close print],
     active: %i[open save close print cut copy paste]
-  }
+  }.freeze
+  private_constant :STATE_OPS
 
   def valid?
-    data.command.nil? || Array(STATE_OPS[context.state]).include?(data.command)
+    data.command.nil? || Array(STATE_OPS[context[:state]]).include?(data.command)
   end
 end
 ````
@@ -97,21 +98,21 @@ Finally, we can process this for all three states:
 
 ````ruby
 no_file_menu =
-  ::TreeBranch.process(
+  TreeBranch.process(
     node: menu,
     comparators: StateComparator,
     context: { state: :none }
   )
 
 passive_file_menu =
-  ::TreeBranch.process(
+  TreeBranch.process(
     node: menu,
     comparators: StateComparator,
     context: { state: :passive }
   )
 
 active_file_menu =
-  ::TreeBranch.process(
+  TreeBranch.process(
     node: menu,
     comparators: StateComparator,
     context: { state: :active }
@@ -291,8 +292,8 @@ Notice now our read-only menu is missing the 'save' item.
 
 There are two ways to create comparators:
 
-1. Subclass ::TreeBranch::Comparator and implement the ```valid?``` method to return true/false
-2. Create lambda/proc that accepts two arguments: data and context and returns true/false
+1. Subclass ::TreeBranch::Comparator and implement the ```valid?``` method to return true/false.
+2. Create lambda/proc that accepts two arguments: data and context and returns true/false.
 
 Option one is shown in the above example, while option two can be illustrated as:
 
@@ -302,7 +303,7 @@ auth_comparator = lambda do |data, context|
 end
 
 passive_read_only_menu =
-  ::TreeBranch.process(
+  TreeBranch.process(
     node: menu,
     comparators: [StateComparator, auth_comparator],
     context: { state: :passive }
@@ -313,14 +314,14 @@ passive_read_only_menu =
 
 After a node has been compared and is deemed to be valid, it will either return one of two things:
 
-1. ::TreeBranch::Node instance
-2. The return of the block passed into the process method produced *(Note: If nil it will be ignored as if it was invalid.)*
+1. A `TreeBranch::Node` instance.
+2. The return value of the block passed into the process method. *Note: If the block returns `nil` then it will be ignored as if it was invalid.*
 
-In our above example we did not pass in a block so they would all return Node instances.  The passed in block is your chance to return instances of another class, or even do some other post-processing routines.  For example, lets return an instance of a new type: MenuItem as shown below:
+In our above example, we did not pass in a block so they would all return Node instances.  The passed in block is your chance to return instances of another class, or even do some other post-processing routines.  For example, lets return an instance of a new type: MenuItem as shown below:
 
 ````ruby
 class MenuItem
-  acts_as_hashable
+  acts_as_hashable # Provided by https://github.com/bluemarblepayroll/acts_as_hashable
 
   attr_reader :menu_items, :name
 
@@ -333,9 +334,7 @@ class MenuItem
     name == other.name && menu_items == other.menu_items
   end
 
-  def ==(other)
-    eql?(other)
-  end
+  alias == eql?
 end
 ````
 
@@ -343,7 +342,7 @@ We can now convert this in the block:
 
 ````ruby
 passive_read_write_menu =
-  ::TreeBranch.process(
+  TreeBranch.process(
     node: menu,
     comparators: [StateComparator, auth_comparator],
     context: { state: :passive, rights: :write }
@@ -385,10 +384,10 @@ Our resulting data set (visualized as a hash):
 Basic steps to take to get this repository compiling:
 
 1. Install [Ruby](https://www.ruby-lang.org/en/documentation/installation/) (check tree_branch.gemspec for versions supported)
-2. Install bundler (gem install bundler)
-3. Clone the repository (git clone git@github.com:bluemarblepayroll/tree_branch.git)
-4. Navigate to the root folder (cd tree_branch)
-5. Install dependencies (bundle)
+2. Install bundler (`gem install bundler`)
+3. Clone the repository (`git clone git@github.com:bluemarblepayroll/tree_branch.git`)
+4. Navigate to the root folder (`cd tree_branch`)
+5. Install dependencies (`bundle`)
 
 ### Running Tests
 
@@ -410,6 +409,12 @@ Also, do not forget to run Rubocop:
 bundle exec rubocop
 ````
 
+Note that the default Rake tasks runs both test and Rubocop:
+
+```
+bundle exec rake
+```
+
 ### Publishing
 
 Note: ensure you have proper authorization before trying to publish new versions.
@@ -417,14 +422,13 @@ Note: ensure you have proper authorization before trying to publish new versions
 After code changes have successfully gone through the Pull Request review process then the following steps should be followed for publishing new versions:
 
 1. Merge Pull Request into master
-2. Update ```lib/tree_branch/version.rb``` using [semantic versioning](https://semver.org/)
-3. Install dependencies: ```bundle```
-4. Update ```CHANGELOG.md``` with release notes
+2. Update `lib/tree_branch/version.rb` using [semantic versioning](https://semver.org/)
+3. Install dependencies: `bundle`
+4. Update `CHANGELOG.md` with release notes
 5. Commit & push master to remote and ensure CI builds master successfully
-6. Build the project locally: `gem build tree_branch`
-7. Publish package to RubyGems: `gem push tree_branch-X.gem` where X is the version to push
-8. Tag master with new version: `git tag <version>`
-9. Push tags remotely: `git push origin --tags`
+6. Run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+
+Note: ensure you have proper authorization before trying to publish new versions.
 
 ## License
 
